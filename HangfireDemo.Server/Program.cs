@@ -1,4 +1,5 @@
 using Hangfire;
+using Hangfire.PostgreSql;
 
 var builder = Host.CreateDefaultBuilder(args);
 
@@ -8,7 +9,8 @@ builder.ConfigureServices(services =>
 {
     services.AddHangfire(opt =>
     {
-        opt.UseSqlServerStorage(configuration.GetConnectionString("PostgresConnectionString"))
+        opt.UsePostgreSqlStorage(options => options.UseNpgsqlConnection(
+                configuration.GetConnectionString("HangfireDemo_DB")))
             .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
             .UseSimpleAssemblyNameTypeSerializer()
             .UseRecommendedSerializerSettings();
