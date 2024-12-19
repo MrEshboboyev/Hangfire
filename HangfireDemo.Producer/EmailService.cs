@@ -11,7 +11,7 @@ public class EmailService : IEmailService
         var email = new MailMessage();
         email.From = new MailAddress(fromEmail);
         email.Subject = "Hangfire Job";
-        email.To.Add(new MailAddress("mreshboboyev@gmail.com"));
+        email.To.Add(new MailAddress("examplemail@mail.com"));
         email.Body = "<html><body>Hello, this is an email sent from HangfireJob</body></html>";
         email.IsBodyHtml = true;
 
