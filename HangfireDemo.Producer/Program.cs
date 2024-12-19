@@ -1,6 +1,7 @@
 using Hangfire;
 using Hangfire.PostgreSql;
 using HangfireBasicAuthenticationFilter;
+using HangfireDemo.Shared.Jobs;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -11,7 +12,8 @@ builder.Services.AddOpenApi();
 
 builder.Services.AddHangfire(opt =>
 {
-    opt.UsePostgreSqlStorage(builder.Configuration.GetConnectionString("PostgresConnectionString"))
+    opt.UsePostgreSqlStorage(options => options.UseNpgsqlConnection
+            (builder.Configuration.GetConnectionString("PostgresConnectionString")))
         .SetDataCompatibilityLevel(CompatibilityLevel.Version_180)
         .UseSimpleAssemblyNameTypeSerializer()
         .UseRecommendedSerializerSettings();
@@ -30,15 +32,22 @@ if (app.Environment.IsDevelopment())
 
 app.UseHangfireDashboard("/hangfire", new DashboardOptions()
 {
-    Authorization = new[]
-    {
+    Authorization =
+    [
         new HangfireCustomBasicAuthenticationFilter()
         {
             User = app.Configuration.GetSection("HangfireOptions:User").Value,
             Pass = app.Configuration.GetSection("HangfireOptions:Pass"). Value,
         }
-    }
+    ]
 });
+
+#endregion
+
+#region Recurring Jobs
+
+RecurringJob.AddOrUpdate<ISendEmailJob>(Guid.NewGuid().ToString(),
+    x => x.ExecuteAsync(), Cron.Minutely);
 
 #endregion
 
